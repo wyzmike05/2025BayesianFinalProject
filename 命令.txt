@@ -1,0 +1,7 @@
+accelerate launch train.py
+
+python test.py seed=1 config_file=./configs/mnist_discrete_.yaml load_model=./pretrained-BFNs/mnist_ema.pt n_steps=784 n_repeats=2000
+
+python sample.py seed=1 config_file=./configs/mnist_discrete_.yaml load_model=./pretrained-BFNs/mnist_ema.pt samples_shape="[4, 28, 28, 1]" label=1 n_steps=100 save_file=./samples_mnist.pt
+
+python -c "import torch; from data import batch_to_images; batch_to_images(torch.load('./samples_mnist.pt')).savefig('mnist.png')"
