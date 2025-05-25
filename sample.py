@@ -42,9 +42,20 @@ def main(cfg: DictConfig) -> torch.Tensor:
     bfn = make_bfn(train_cfg.model)
 
     bfn.load_state_dict(torch.load(cfg.load_model, weights_only=True, map_location="cpu"))
+    # Determine device
     if torch.cuda.is_available():
-        bfn.to("cuda")
-    samples = bfn.sample(cfg.samples_shape, cfg.n_steps)
+        device = "cuda"
+    else:
+        device = "cpu"
+
+    # Convert cfg.label (integer) to a tensor
+    # The model expects a tensor for the label, e.g., for batch size 1, it might be torch.tensor([1])
+    label_tensor = torch.tensor([cfg.label], device=device) # Create a 1D tensor with the label
+
+    # Ensure bfn is on the correct device (already done a few lines above)
+    bfn.to(device)
+
+    samples = bfn.sample(cfg.samples_shape, label_tensor, cfg.n_steps)
 
     if cfg.save_file is not None:
         torch.save(samples.to("cpu"), cfg.save_file)

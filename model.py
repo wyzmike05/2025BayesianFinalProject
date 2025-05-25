@@ -352,11 +352,22 @@ class BFN(nn.Module):
         return loss.mean()
 
     @torch.inference_mode()
-    def compute_reconstruction_loss(self, data: Tensor) -> Tensor:
+    def compute_reconstruction_loss(self, data: Tensor, label: Tensor) -> Tensor: # Add label to signature
         t = torch.ones_like(data).float()
-        input_params = self.bayesian_flow(data, t)
+        # Ensure t matches the expected shape for label if it's used by bayesian_flow or net with t
+        # For MNIST, data might be (B, H, W, C) and t is often (B, 1) or scalar broadcasted.
+        # Here, t is shaped like data. Let's reshape t to be (B, 1) for consistency with how it's usually handled with labels.
+        # However, looking at DiscreteBayesianFlow.forward, t is expected to be like data.
+        # The net.forward (UNetModel) takes t as (B,). Let's see if shaping t like data causes issues deeper.
+        # The original BFN.forward samples t and then does:
+        # t = (torch.ones_like(data).flatten(start_dim=1) * t).reshape_as(data)
+        # This makes t have the same shape as data.
+        # UNetModel.forward then does: timesteps = t.flatten(start_dim=1)[:, 0] * 4000
+        # So, t having the same shape as data for the UNetModel input is fine.
+
+        input_params = self.bayesian_flow(data, label, t) # Pass label
         net_inputs = self.bayesian_flow.params_to_net_inputs(input_params)
-        output_params: Tensor = self.net(net_inputs, t)
+        output_params: Tensor = self.net(net_inputs, t, label) # Pass label
         return (
             self.loss.reconstruction_loss(data, output_params, input_params)
             .flatten(start_dim=1)
@@ -386,8 +397,9 @@ class BFN(nn.Module):
             )
 
         t = torch.ones(*data_shape, device=device)
+        # 为 self.net 调用添加 label
         output_params = self.net(
-            self.bayesian_flow.params_to_net_inputs(input_params), t
+            self.bayesian_flow.params_to_net_inputs(input_params), t, label
         )
         output_sample = distribution_factory.get_dist(
             output_params, input_params, t

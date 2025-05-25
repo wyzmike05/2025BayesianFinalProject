@@ -71,7 +71,7 @@ def test(
                 data = data.to("cuda") if torch.cuda.is_available() else data
                 label = label.to("cuda") if torch.cuda.is_available() else label
                 loss = model(data, label, n_steps=n_steps).item()
-                recon_loss = model.compute_reconstruction_loss(eval_batch).item()
+                recon_loss = model.compute_reconstruction_loss(data, label).item()
                 _losses.append(loss)
                 _recon_losses.append(recon_loss)
                 pbar.update(
