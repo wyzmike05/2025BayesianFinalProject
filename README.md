@@ -1,8 +1,6 @@
-# Bayesian Flow Networks
+# Conditional Bayesian Flow Networks
 
-This is the official code release for [Bayesian Flow Networks](https://arxiv.org/abs/2308.07037) by Alex Graves, Rupesh Kumar Srivastava, Timothy Atkinson and Faustino Gomez.
-
-<img src="bfn.gif" alt="Overview of BFN process" style="width:600px;"/>
+This repository is based on the official code release for [Bayesian Flow Networks](https://arxiv.org/abs/2308.07037) by Alex Graves, Rupesh Kumar Srivastava, Timothy Atkinson and Faustino Gomez.
 
 ## Reading Guide
 
@@ -11,6 +9,7 @@ This is the official code release for [Bayesian Flow Networks](https://arxiv.org
 - `train.py`, `test.py` and `sample.py` are scripts for training, testing and sampling (see below for usage).
 - `data.py` contains utilities related to data loading and processing.
 - `networks/` contains implementations of the network architectures used by the models. 
+- `checkpoints/` contains the archieved files of our experimental results of the conditional BFN, including models and training dynamics.
 
 ## Setup
 
@@ -78,15 +77,8 @@ python -c "import torch; from data import batch_to_images; batch_to_images(torch
 python -c "import torch; from data import batch_to_str; print(batch_to_str(torch.load('./samples_text8.pt')))"
 ```
 
-## Reproducibility 
 
-If a high degree of reproducibility is desired (e.g. during sampling), set the following:
 
-```python
-torch.set_float32_matmul_precision("highest")
-torch.use_deterministic_algorithms(True)
-torch.backends.cudnn.benchmark = False
-```
 
 ## Acknowledgements
 
