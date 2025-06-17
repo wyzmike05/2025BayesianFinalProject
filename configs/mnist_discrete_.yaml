@@ -66,6 +66,6 @@ training:
   ema_decay: 0.9999
   grad_clip_norm: 5.0
   log_interval: 1
-  n_training_steps: 1_000_000
+  n_training_steps: 10_000
   val_interval: 50_000
   val_repeats: 1000

@@ -97,11 +97,15 @@ class FourierImageInputAdapter(nn.Module):
                 ],
                 -1,
             )
-        fourier_feats = self.pos_feats.expand(img.size(0), -1, -1)
+        fourier_feats = self.pos_feats.expand(img.size(0), -1, -1) # img is net_inputs
         all_feat_list = [flat_img]
         if self.add_mask:
-            all_feat_list.append(t_feats)
-        if self.add_pos_feats:
+            # Expand t_feats to match the sequence dimension of flat_img
+            # flat_img has shape (B, Num_pixels, Img_feature_dim)
+            # t_feats has shape (B, 1, Time_feature_dim)
+            t_feats_expanded = t_feats.expand(-1, flat_img.size(1), -1)
+            all_feat_list.append(t_feats_expanded)
+        if self.add_pos_feats: # This is False based on your config
             all_feat_list.append(fourier_feats)
         all_feats = torch.cat(all_feat_list, dim=-1)
         if self.output_projection is None:
