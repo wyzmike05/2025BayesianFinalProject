@@ -30,42 +30,51 @@ pip install neptune
 
 ## Training
 
-The models in the paper can be trained using the configs provided in the `configs` dir as follows:
+Use `accelerate` to start training. Configs are defined in `configs/mnist_discrete_.yaml`.
 
 ```shell
 # mnist experiment on 1 GPU
 accelerate launch train.py
 ```
+During training process the checkpoints are saved in `./checkpoints/BFN/`, including the latest (`last`) and the best (`best`) model.
 
 ## Testing
 > [!NOTE]
 > Depending on your GPU, you may wish to adjust the batch size used for testing in `test.py`.
+
+After training is complete, the performance of the model can be evaluated on the test set using `test.py`. You need to specify the configuration file, the path to the model to load, the number of evaluation steps, and the number of repetitions.
 ```shell
 # Compute 784-step loss on MNIST
-python test.py seed=1 config_file=./configs/mnist_discrete_.yaml load_model= n_steps=784 n_repeats=2000
+python test.py seed=1 config_file=./configs/mnist_discrete_.yaml load_model=./checkpoints/BFN/last/pytorch_model.bin n_steps=784 n_repeats=20
 ```
 > [!IMPORTANT]
 > All computed results will be in nats-per-data-dimension. To convert to bits, divide by $\ln(2)$.
 
-## Sampling
+## Conditional Sampling
 
-You can sample from a pre-trained model as follows (change options as desired):
+Use `sample.py` to generate new image samples according to the specified label:
 
 ```shell
-# Sample 4 binarized MNIST images using 100 steps
-python sample.py seed=1 config_file=./configs/mnist_discrete.yaml load_model= samples_shape="[4, 28, 28, 1]" n_steps=100 save_file=./samples_mnist.pt
+# Sample 4 binarized MNIST images with label 1 using 100 steps
+python sample.py seed=1 config_file=./configs/mnist_discrete_.yaml load_model=./checkpoints/BFN/last/pytorch_model.bin samples_shape="[4, 28, 28, 1]" label=1 n_steps=100 save_file=./samples_mnist_label_1.pt
 ```
+* `label`: specifies the label of the number to be generated (for example, `label=1` means generating the number "1").
 
+## Visualizing the generated samples
 The samples are stored as PyTorch tensors in the `save_file`, and can be visualized by loading them and then using the utilities `batch_to_images` and `batch_to_str` in `data.py`.
 For example: 
 ```shell
 # batch_to_images returns a matplotlib Figure object
-python -c "import torch; from data import batch_to_images; batch_to_images(torch.load('./samples_mnist.pt')).savefig('mnist.png')"
+python -c "import torch; from data import batch_to_images; batch_to_images(torch.load('./samples_mnist_label_1.pt')).savefig('samples_mnist_label_1.png')"
 ```
+* Make sure the path to the `.pt` file and the output `.png` file name match what you used in the previous step.
 
 ## Visualizing Flow
-
-
+Use `visualize_flow.py` to analyze how the input and output distributions within the model evolve over time:
+```shell
+python visualize_flow.py
+```
+* Before running, make sure the `CONFIG_PATH`, `MODEL_CHECKPOINT_PATH`, and `IMAGE_INDICES_TO_VISUALIZE` variables in the script are set to your needs.
 
 
 ## References
