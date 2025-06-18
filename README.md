@@ -4,7 +4,7 @@ This repository is based on the official code release for [Bayesian Flow Network
 
 ## Reading Guide
 
-- `checkpoints/` contains the archieved files of our experimental results of the conditional BFN, including models and training dynamics.
+- `checkpoints/` contains the compressed files of our experimental results of the conditional BFN, including models and training dynamics. Before using, do decompress the files to get our trained models.
 - `configs/` contains the configs of the BFN model, default to `mnist_discrete_.yaml` in this repository.
 - `flow_visualization/` contains three sets of samples drawn from the generating process of the output distribution and input distribution.
 - `networks/` contains implementations of the network architectures used by the models. 
